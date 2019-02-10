@@ -12,15 +12,106 @@
             padding: 0;
             margin: 0;
         }
+        .container {
+            border: 1px solid;
+            width: 80%;
+            margin: auto;
+        }
     </style>
 </head>
 <body>
-    <script>
-        "use strict"
+    <script type="text/javascript">
+
         (function() {
             //TODO
             //try to implement auth headers but in http only cookies
             //then xhr.withCredentials = true
+
+            document.addEventListener('DOMContentLoaded', app);
+            
+            function app() {
+                let headers = {};
+                headers.Token = getCookies().Token;
+                //headers['Access-Control-Allow-Origin'] = '*';
+                console.log('headers: ', headers);
+                
+                //lol wut not very realistic
+                let url = 'http://localhost:3333/users/',
+                body = document.body,
+                d1 = c('div', {'class': 'container'}, null), 
+                d2 = c('div', {'class': 'container'}, null), 
+                button1 = c('button', null, 'get users'),
+                inp = c('input', {id: 'inp', type: 'number'}, null),
+                button2 = c('button', null, 'get 1 user');
+
+                button1.addEventListener('click', function() {
+                    makeGetRequest(url, headers);
+                });
+                button2.addEventListener('click', function() {
+                    makeGetRequest(url + $id('inp').value, headers)
+                    $id('inp').value = '';
+                });
+
+                d1.appendChild(button1);
+                appendAll(d2, [inp, button2]);
+                appendAll(body, [d1, d2]);
+            }
+
+            function makeGetRequest(u, headers) {
+                let req = new XMLHttpRequest();
+                req.open('GET', u);
+                req.withCredentials = true;
+                if (headers) {
+                    for (let h in headers) {
+                        if (headers.hasOwnProperty(h)) {
+                            req.setRequestHeader(h, headers[h]);
+                        }
+                    }
+                }
+                
+                req.onload = function() {
+                    if (req.status < 399) {
+                        console.log(JSON.parse(req.responseText))
+                    } else {
+                        console.log('error: ', req.status)
+                    }
+                }
+                req.send();
+            }
+
+            function c(tagName, attrs, html) {
+                let el = document.createElement(tagName);
+                if (attrs) {
+                    for (let a in attrs) {
+                        if (attrs.hasOwnProperty(a)) {
+                            el.setAttribute(a, attrs[a]);
+                        }
+                    }
+                }
+                if (html) {
+                    el.innerHTML = html;
+                }
+                return el;
+            }
+
+            function appendAll(parent, children) {
+                children.forEach((c) => parent.appendChild(c));
+            }
+
+            function $id(id) {
+                return document.getElementById(id);
+            }
+
+            function getCookies() {
+                let cookies = {};
+                document.cookie
+                .split(';')
+                .forEach((cStr) => {
+                    let cArr = cStr.split('='); 
+                    cookies[cArr[0]] = cArr[1];
+                });
+                return cookies;
+            }
         })();
     </script>
 </body>
