@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	jwt "github.com/dgrijalva/jwt-go"
+	cors "github.com/rs/cors"
 	"log"
 	"net/http"
 	"strings"
@@ -51,7 +52,7 @@ func handleUser(w http.ResponseWriter, r *http.Request, id string) {
 		w.WriteHeader(500)
 		w.Write([]byte("Server error"))
 	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(u)
@@ -60,7 +61,7 @@ func handleUser(w http.ResponseWriter, r *http.Request, id string) {
 func isAuthorized(endpoint func(http.ResponseWriter, *http.Request)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "OPTIONS" {
-			// log.Println(r.Header["Token"])
+			log.Println(r.Header["Token"])
 			//w.Header().Set("Access-Control-Allow-Origin", "*")
 		}
 
@@ -91,7 +92,14 @@ func isAuthorized(endpoint func(http.ResponseWriter, *http.Request)) http.Handle
 }
 
 func handleRequests() {
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodDelete},
+		AllowCredentials: true,
+	})
+
 	http.HandleFunc("/", handleRoutes)
-	http.Handle("/users/", isAuthorized(handleUsers))
+	http.Handle("/users/", c.Handler(isAuthorized(handleUsers)))
+	// http.Handle("/users/", corsHandler(handleUsers))
 	log.Fatal(http.ListenAndServe(":3333", nil))
 }

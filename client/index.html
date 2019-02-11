@@ -32,7 +32,7 @@
             function app() {
                 let headers = {};
                 headers.Token = getCookies().Token;
-                //headers['Access-Control-Allow-Origin'] = '*';
+                headers['Access-Control-Allow-Origin'] = '*';
                 console.log('headers: ', headers);
                 
                 //lol wut not very realistic
@@ -60,7 +60,7 @@
             function makeGetRequest(u, headers) {
                 let req = new XMLHttpRequest();
                 req.open('GET', u);
-                req.withCredentials = true;
+                //req.withCredentials = true;
                 if (headers) {
                     for (let h in headers) {
                         if (headers.hasOwnProperty(h)) {
